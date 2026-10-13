@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -95,7 +96,7 @@ private fun FollowUpRow(
             .fillMaxWidth()
             .clickable { onOpenStudent(followUp.studentId) }
             .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         Icon(
             Icons.Filled.EventNote,
@@ -114,11 +115,16 @@ private fun FollowUpRow(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        }
-        if (onMarkDone != null) {
-            TextButton(onClick = { onMarkDone(followUp.id) }) {
-                Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
-                Text("Done")
+            // Below the agenda rather than trailing it: as a trailing button it cost the agenda
+            // a third of the row and pushed it to three lines.
+            if (onMarkDone != null) {
+                TextButton(
+                    onClick = { onMarkDone(followUp.id) },
+                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp),
+                ) {
+                    Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
+                    Text("Done")
+                }
             }
         }
     }

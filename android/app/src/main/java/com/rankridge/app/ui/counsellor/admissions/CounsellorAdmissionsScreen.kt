@@ -80,18 +80,18 @@ fun CounsellorAdmissionsScreen(
 @Composable
 private fun ApplicationRow(application: AdmissionApplication) {
     val colors = applicationStatusColors(application.status)
+    // Everything on full-width lines with the status pill beneath. Beside the text, a pill as
+    // wide as "Documents pending" left the course line barely half the row, so it ran to three
+    // broken lines.
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(application.studentName, style = MaterialTheme.typography.titleSmall)
-                Text(
-                    text = "${application.course} · ${application.branch}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            StatusPill(text = application.status.label(), container = colors.container, content = colors.content)
-        }
+        Text(application.studentName, style = MaterialTheme.typography.titleSmall)
+        Text(
+            text = "${application.course} · ${application.branch}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        VSpace(8)
+        StatusPill(text = application.status.label(), container = colors.container, content = colors.content)
         VSpace(8)
         Text(
             text = "Submitted ${application.submittedLabel} · ${application.documentsStatus}",

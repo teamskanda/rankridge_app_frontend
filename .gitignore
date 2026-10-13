@@ -1,0 +1,72 @@
+# ---------------------------------------------------------------------------
+# Rankridge — project ignore rules
+#
+# Scope note: this file only governs the rankridge_app/ subtree. See the
+# warning at the bottom about where this repository is actually rooted.
+# ---------------------------------------------------------------------------
+
+# --- Signing credentials: never commit -------------------------------------
+# keystore.properties holds the release store/key passwords in plain text, and
+# a .jks/.keystore IS the signing identity. If either reaches a remote, the key
+# must be treated as compromised and the app re-keyed.
+keystore.properties
+*.jks
+*.keystore
+*.p12
+*.pepk
+google-services.json
+play-service-account*.json
+
+# --- Local machine config ---------------------------------------------------
+# local.properties pins the absolute Android SDK path, which differs per machine.
+local.properties
+.env
+.env.*
+!.env.example
+
+# --- Gradle / Android build output ------------------------------------------
+# Build output is redirected to C:\AndroidBuilds\rankridge_app by the root
+# android/build.gradle.kts (to keep OneDrive from locking files mid-write), so
+# these mostly will not appear — kept as a safety net for anyone building with
+# that redirect removed.
+.gradle/
+build/
+captures/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+release/
+lint-results*.html
+lint-results*.xml
+
+# --- IDE --------------------------------------------------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/extensions.json
+
+# --- Node / web (web/ also carries its own .gitignore) ----------------------
+node_modules/
+dist/
+.vite/
+*.local
+npm-debug.log*
+yarn-error.log*
+
+# --- OS ---------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# --- Misc -------------------------------------------------------------------
+*.log
+*.tmp
+*.bak
+*~

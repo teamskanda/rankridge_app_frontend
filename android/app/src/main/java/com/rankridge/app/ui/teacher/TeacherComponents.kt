@@ -9,23 +9,28 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.rankridge.app.ui.common.EntityRow
 import com.rankridge.app.ui.common.HSpace
+import com.rankridge.app.ui.common.InitialsAvatar
 import com.rankridge.app.ui.common.StatusPill
 
 /** Colour + label mapping for [RiskLevel], shared across Home, Students and the detail screen. */
@@ -92,46 +97,87 @@ fun TeacherStudentRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = riskColors(student.riskLevel)
+    EntityRow(
+        title = student.name,
+        subtitle = student.batchName,
+        pillText = student.riskLevel.label(),
+        pillContainer = colors.container,
+        pillContent = colors.content,
+        note = "${student.attendancePercent}% attendance",
+        onClick = onClick,
+        modifier = modifier,
+        leading = { InitialsAvatar(student.initials, colors.container, colors.content) },
+    )
+}
+
+/**
+ * One schedule entry: time and kind, the lecture/test title, where it is, and the attendance
+ * action.
+ *
+ * The action sits below the text rather than beside it. As a trailing element in the same Row it
+ * was measured first, leaving a long lecture title ("Rotational Motion — Torque & Angular
+ * Momentum") about half the row to wrap into, so it came out broken across two lines and still
+ * ellipsised. Below the text the title gets the full row width and reads in full.
+ */
+@Composable
+fun ScheduleEventRow(
+    event: ScheduleEvent,
+    onMarkAttendance: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth().padding(vertical = 10.dp),
+        verticalAlignment = Alignment.Top,
     ) {
         Box(
             modifier = Modifier
-                .size(44.dp)
+                .size(40.dp)
                 .clip(CircleShape)
-                .background(colors.container),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
         ) {
-            Text(student.initials, style = MaterialTheme.typography.titleSmall, color = colors.content)
+            Icon(
+                event.type.icon(),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(20.dp),
+            )
         }
-        HSpace(14)
+        HSpace(12)
         Column(modifier = Modifier.weight(1f)) {
-            Text(student.name, style = MaterialTheme.typography.bodyLarge)
             Text(
-                text = student.batchName,
+                text = "${event.timeLabel} · ${event.type.label()}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = event.subjectOrTopic,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = "${event.batchName} · ${event.location}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (event.requiresAttendance) {
+                Spacer(Modifier.size(10.dp))
+                if (event.attendanceMarked) {
+                    StatusPill(
+                        text = "Attendance marked",
+                        container = MaterialTheme.colorScheme.tertiaryContainer,
+                        content = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                } else {
+                    Button(
+                        onClick = { onMarkAttendance(event.id) },
+                        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
+                    ) {
+                        Text("Mark attendance")
+                    }
+                }
+            }
         }
-        Column(horizontalAlignment = Alignment.End) {
-            StatusPill(text = student.riskLevel.label(), container = colors.container, content = colors.content)
-            Spacer(Modifier.size(4.dp))
-            Text(
-                text = "${student.attendancePercent}% att.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        HSpace(4)
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }

@@ -58,7 +58,7 @@ fun CounsellorHomeScreen(
                 )
                 MetricTile(
                     value = "${metrics.followUpsToday}",
-                    label = "Follow-ups today",
+                    label = "Follow-ups",
                     modifier = Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.secondary,
                 )
@@ -73,12 +73,12 @@ fun CounsellorHomeScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 MetricTile(
                     value = "${metrics.applicationsPending}",
-                    label = "Applications pending",
+                    label = "Pending",
                     modifier = Modifier.weight(1f),
                 )
                 MetricTile(
                     value = "${metrics.admissionsThisMonth}",
-                    label = "Admissions this month",
+                    label = "Admissions",
                     modifier = Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.tertiary,
                 )

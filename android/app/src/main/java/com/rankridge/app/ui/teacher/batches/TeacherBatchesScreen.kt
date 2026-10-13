@@ -71,7 +71,7 @@ private fun BatchCard(batch: TeacherBatch, onClick: () -> Unit) {
             )
             MetricTile(
                 value = "${batch.latestTestAveragePercent}%",
-                label = "Last test avg",
+                label = "Test avg",
                 modifier = Modifier.weight(1f),
                 accent = MaterialTheme.colorScheme.tertiary,
             )

@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -41,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.rankridge.app.R
@@ -122,9 +125,16 @@ fun OtpInput(
         ),
         keyboardActions = KeyboardActions(onDone = { onDone() }),
         decorationBox = {
+            // Cells size from the available width (weight(1f)) with height DERIVED from that
+            // width via aspectRatio, rather than a fixed height paired with a flexible width.
+            // Pairing a flexible dimension with a fixed one is what produced the stretched,
+            // pill-like cells on narrower phones: six 56dp-tall boxes with no room left for the
+            // matching width. A fixed aspect ratio keeps the same friendly proportions from a
+            // small phone up to the 480dp-wide card cap, and the shape scales down with it.
+            val cellShape = RoundedCornerShape(12.dp)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 repeat(length) { index ->
                     val char = value.getOrNull(index)?.toString().orEmpty()
@@ -144,12 +154,12 @@ fun OtpInput(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(56.dp)
-                            .background(fillColor, RoundedCornerShape(14.dp))
+                            .aspectRatio(0.8f)
+                            .background(fillColor, cellShape)
                             .border(
                                 width = if (active) 2.dp else 1.dp,
                                 color = borderColor,
-                                shape = RoundedCornerShape(14.dp),
+                                shape = cellShape,
                             ),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -235,7 +245,15 @@ fun PrimaryButton(
     }
 }
 
-/** "Prompt + action" row used to switch between sign-in and sign-up. */
+/**
+ * "Prompt + action" row used to switch between sign-in and sign-up.
+ *
+ * Stacked rather than side-by-side. In an unweighted Row, two text children aren't measured
+ * against a shared budget — on a screen narrow enough that both don't fit one line, the second
+ * child (the button) was left almost no room and wrapped character-by-character ("Creat" /
+ * "e" / "acco" / "unt") instead of wrapping at a word boundary. Stacking removes the shared
+ * line entirely, so each piece of text always gets the full row width to wrap normally in.
+ */
 @Composable
 fun AuthSwitchRow(
     prompt: String,
@@ -244,12 +262,15 @@ fun AuthSwitchRow(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    Row(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = prompt, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = prompt,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+        )
         TextButton(onClick = onActionClick, enabled = enabled) {
             Text(actionText)
         }

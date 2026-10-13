@@ -48,16 +48,16 @@ fun AcademicHeadHomeScreen(
         SectionHeader("Today's academic operations")
         DashboardCard {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MetricTile(value = "${ops.classesCompleted}/${ops.classesPlanned}", label = "Classes held", modifier = Modifier.weight(1f))
+                MetricTile(value = "${ops.classesCompleted}/${ops.classesPlanned}", label = "Classes", modifier = Modifier.weight(1f))
                 MetricTile(
                     value = "${ops.attendanceAvgPercent}%",
-                    label = "Avg attendance",
+                    label = "Attendance",
                     modifier = Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.secondary,
                 )
                 MetricTile(
                     value = "${ops.syllabusOnTrackPercent}%",
-                    label = "Syllabus on track",
+                    label = "On track",
                     modifier = Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.tertiary,
                 )
@@ -77,19 +77,19 @@ fun AcademicHeadHomeScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 MetricTile(
                     value = "${risk.highCount}",
-                    label = "High risk",
+                    label = "High",
                     modifier = Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.error,
                 )
                 MetricTile(
                     value = "${risk.moderateCount}",
-                    label = "Moderate risk",
+                    label = "Moderate",
                     modifier = Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.secondary,
                 )
                 MetricTile(
                     value = "${risk.openInterventions}",
-                    label = "Open interventions",
+                    label = "Open",
                     modifier = Modifier.weight(1f),
                 )
             }

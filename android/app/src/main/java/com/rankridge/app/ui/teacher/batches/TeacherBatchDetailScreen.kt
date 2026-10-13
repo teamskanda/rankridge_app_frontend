@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rankridge.app.ui.common.DashboardCard
 import com.rankridge.app.ui.common.MetricTile
@@ -64,7 +65,7 @@ fun TeacherBatchDetailScreen(
                 )
                 MetricTile(
                     value = "${batch.latestTestAveragePercent}%",
-                    label = "Last test avg",
+                    label = "Test avg",
                     modifier = Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.tertiary,
                 )
@@ -115,7 +116,12 @@ private fun SyllabusRow(item: SyllabusItem, onMarkSyllabusTaught: (String) -> Un
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(item.topic, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                item.topic,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
             Text(
                 text = item.plannedDateLabel,
                 style = MaterialTheme.typography.bodySmall,
@@ -139,7 +145,12 @@ private fun TestRow(test: TestItem) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(test.name, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                test.name,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
             Text(
                 text = if (test.status == TestStatus.COMPLETED && test.batchAverage != null) {
                     "${test.dateLabel} · Avg ${test.batchAverage}% · High ${test.highest}% · Low ${test.lowest}%"
@@ -177,7 +188,12 @@ private fun AssignmentRow(assignment: AssignmentItem) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(assignment.title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                assignment.title,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
             Text(
                 text = "Due ${assignment.dueDateLabel} · ${assignment.submittedCount}/${assignment.totalCount} submitted",
                 style = MaterialTheme.typography.bodySmall,

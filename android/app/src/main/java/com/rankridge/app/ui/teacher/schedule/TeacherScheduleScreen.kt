@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.rankridge.app.ui.common.DashboardCard
@@ -27,7 +28,7 @@ import com.rankridge.app.ui.common.SectionHeader
 import com.rankridge.app.ui.common.StatusPill
 import com.rankridge.app.ui.common.VSpace
 import com.rankridge.app.ui.teacher.PtmStatus
-import com.rankridge.app.ui.teacher.ScheduleEvent
+import com.rankridge.app.ui.teacher.ScheduleEventRow
 import com.rankridge.app.ui.teacher.TeacherDashboard
 import com.rankridge.app.ui.teacher.TeacherMockData
 import com.rankridge.app.ui.teacher.icon
@@ -55,7 +56,7 @@ fun TeacherScheduleScreen(
             SectionHeader(day)
             DashboardCard {
                 events.forEachIndexed { index, event ->
-                    EventRow(event, onMarkAttendance)
+                    ScheduleEventRow(event, onMarkAttendance)
                     if (index != events.lastIndex) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     }
@@ -67,18 +68,20 @@ fun TeacherScheduleScreen(
             SectionHeader("Parent-teacher meetings")
             DashboardCard {
                 dashboard.ptms.forEachIndexed { index, ptm ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("${ptm.studentName} · ${ptm.dateLabel}${if (ptm.timeLabel != "—") " · ${ptm.timeLabel}" else ""}", style = MaterialTheme.typography.titleSmall)
-                            Text(
-                                text = "${ptm.parentName} — ${ptm.concern}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                    // Status below the text, not beside it: "Kabir Mehta · Today · 4:00 PM" and a
+                    // "Scheduled" pill do not both fit one 360dp line, and the pill measured
+                    // first, so the name was the part that broke.
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+                        Text(
+                            text = "${ptm.studentName} · ${ptm.dateLabel}${if (ptm.timeLabel != "—") " · ${ptm.timeLabel}" else ""}",
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            text = "${ptm.parentName} — ${ptm.concern}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        VSpace(8)
                         StatusPill(
                             text = if (ptm.status == PtmStatus.SCHEDULED) "Scheduled" else "Completed",
                             container = if (ptm.status == PtmStatus.SCHEDULED) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer,
@@ -88,47 +91,6 @@ fun TeacherScheduleScreen(
                     if (index != dashboard.ptms.lastIndex) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun EventRow(event: ScheduleEvent, onMarkAttendance: (String) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(event.type.icon(), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(20.dp))
-        }
-        HSpace(12)
-        Column(modifier = Modifier.weight(1f)) {
-            Text("${event.timeLabel} · ${event.type.label()}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(event.subjectOrTopic, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = "${event.batchName} · ${event.location}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (event.requiresAttendance) {
-            if (event.attendanceMarked) {
-                StatusPill(
-                    text = "Marked",
-                    container = MaterialTheme.colorScheme.tertiaryContainer,
-                    content = MaterialTheme.colorScheme.onTertiaryContainer,
-                )
-            } else {
-                Button(onClick = { onMarkAttendance(event.id) }) {
-                    Text("Mark")
                 }
             }
         }

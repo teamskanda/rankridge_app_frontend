@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,6 +62,7 @@ import com.rankridge.app.ui.student.TodayClass
 import com.rankridge.app.ui.student.UpcomingTest
 import com.rankridge.app.ui.common.DashboardCard
 import com.rankridge.app.ui.common.HSpace
+import com.rankridge.app.ui.common.AutoShrinkText
 import com.rankridge.app.ui.common.MetricTile
 import com.rankridge.app.ui.common.SectionHeader
 import com.rankridge.app.ui.common.Sparkline
@@ -140,24 +143,46 @@ private fun QuickActions(onAction: (String) -> Unit) {
         Triple(Icons.Filled.BookmarkBorder, "Bookmarks", "Opening bookmarks"),
         Triple(Icons.Filled.DownloadForOffline, "Downloads", "Opening downloads"),
     )
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(top = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    // A fixed two-by-three grid rather than a horizontally scrolling strip. Scrolling put a
+    // half-chip at the screen edge, and because the label is centred in its chip, what the edge
+    // cut was the middle of a word ("Timetabl"). It also hid two actions behind a gesture
+    // nothing on screen advertised. Six chips at a third of the width each fit their labels at
+    // full size and are all visible at once.
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        actions.forEach { (icon, label, msg) ->
-            QuickActionChip(icon, label) { onAction(msg) }
+        actions.chunked(3).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                row.forEach { (icon, label, msg) ->
+                    QuickActionChip(
+                        icon = icon,
+                        label = label,
+                        modifier = Modifier.weight(1f),
+                    ) { onAction(msg) }
+                }
+                repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+            }
         }
     }
 }
 
 @Composable
-private fun QuickActionChip(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun QuickActionChip(
+    icon: ImageVector,
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(78.dp).clip(MaterialTheme.shapes.medium).clickable(onClick = onClick).padding(vertical = 4.dp),
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
     ) {
         Box(
             modifier = Modifier
@@ -169,11 +194,11 @@ private fun QuickActionChip(icon: ImageVector, label: String, onClick: () -> Uni
             Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         }
         VSpace(6)
-        Text(
+        AutoShrinkText(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
+            minScale = 0.75f,
         )
     }
 }
@@ -274,7 +299,7 @@ private fun TodayPlanCard(classes: List<TodayClass>, pendingCount: Int, onAction
 
 @Composable
 private fun ClassRow(item: TodayClass, onAction: (String) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.Top) {
         SubjectAvatar(
             subject = item.subject,
             container = MaterialTheme.colorScheme.primaryContainer,
@@ -297,6 +322,8 @@ private fun ClassRow(item: TodayClass, onAction: (String) -> Unit) {
                 text = item.topic,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
             VSpace(4)
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -313,14 +340,30 @@ private fun ClassRow(item: TodayClass, onAction: (String) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        }
-        if (item.isNext) {
-            val isOnline = item.mode == ClassMode.ONLINE
-            // Solid primary, not a gold tonal button. This is the single most important action
-            // on the home screen, and gold is already carrying the "pending work" warning below —
-            // two different jobs were reading as the same colour.
-            Button(onClick = { onAction(if (isOnline) "Joining ${item.subject} class" else "Opening ${item.subject} class") }) {
-                Text(if (isOnline) "Join" else "Open")
+            if (item.isNext) {
+                val isOnline = item.mode == ClassMode.ONLINE
+                VSpace(10)
+                // Solid primary, not a gold tonal button. This is the single most important
+                // action on the home screen, and gold is already carrying the "pending work"
+                // warning below — two different jobs were reading as the same colour.
+                //
+                // Below the text rather than trailing it: as a trailing element the button was
+                // measured first, which left the topic line ("Rotational Motion — Torque &
+                // Angular Momentum") barely half the row and cut it off.
+                Button(
+                    onClick = {
+                        onAction(
+                            if (isOnline) {
+                                "Joining ${item.subject} class"
+                            } else {
+                                "Opening ${item.subject} class"
+                            },
+                        )
+                    },
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
+                ) {
+                    Text(if (isOnline) "Join class" else "Open class")
+                }
             }
         }
     }

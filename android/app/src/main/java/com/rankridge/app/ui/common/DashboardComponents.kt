@@ -2,11 +2,14 @@ package com.rankridge.app.ui.common
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -22,18 +27,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import com.rankridge.app.ui.theme.MetricNumber
 import com.rankridge.app.ui.theme.rankridgeCardBorder
 import com.rankridge.app.ui.theme.rankridgeCardColor
@@ -140,7 +154,37 @@ fun SubjectAvatar(
     }
 }
 
-/** A labelled value block used in metric grids (big number + caption). */
+/** Circular initials avatar used as the leading element of an [EntityRow]. */
+@Composable
+fun InitialsAvatar(
+    initials: String,
+    container: Color,
+    content: Color,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(container),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text = initials, style = MaterialTheme.typography.titleSmall, color = content)
+    }
+}
+
+/**
+ * A labelled value block used in metric grids (big number + caption).
+ *
+ * The value and the label each sit in a box whose height is reserved from that text style's own
+ * line height, with the text bottom-aligned inside it. [AutoShrinkText] shrinks a value that
+ * would not otherwise fit its tile, and without a reserved box that shorter line pulled the label
+ * up with it — which is why "81% / Syllabus" sat several dp above "3 / Today" in the same row.
+ * Reserving the full line height regardless of the size actually rendered keeps every tile in a
+ * row sitting on the same two lines.
+ *
+ * Prefer [MetricRow] over hand-rolling a Row of these: it caps how many share one line.
+ */
 @Composable
 fun MetricTile(
     value: String,
@@ -149,13 +193,16 @@ fun MetricTile(
     icon: ImageVector? = null,
     accent: Color = MaterialTheme.colorScheme.primary,
 ) {
+    val labelStyle = MaterialTheme.typography.labelMedium
+    val valueHeight = reservedLineHeight(MetricNumber)
+    val labelHeight = reservedLineHeight(labelStyle)
     Box(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-            .padding(14.dp),
+            .padding(12.dp),
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxWidth()) {
             if (icon != null) {
                 Icon(
                     imageVector = icon,
@@ -164,19 +211,212 @@ fun MetricTile(
                     modifier = Modifier.size(20.dp).padding(bottom = 6.dp),
                 )
             }
-            Text(
-                text = value,
-                style = MetricNumber,
-                color = accent,
-            )
+            // A metric is a single token — "81%" must never become "81" over "%". It shrinks to
+            // fit instead of wrapping, which is what a narrow tile was previously forcing.
+            Box(
+                modifier = Modifier.fillMaxWidth().height(valueHeight),
+                contentAlignment = Alignment.BottomStart,
+            ) {
+                AutoShrinkText(text = value, style = MetricNumber, color = accent)
+            }
             Spacer(Modifier.height(2.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth().height(labelHeight),
+                contentAlignment = Alignment.BottomStart,
+            ) {
+                AutoShrinkText(
+                    text = label,
+                    style = labelStyle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    minScale = 0.7f,
+                )
+            }
         }
     }
+}
+
+/** Height to reserve for one line of [style], falling back when the style sets no line height. */
+@Composable
+private fun reservedLineHeight(style: TextStyle) = with(LocalDensity.current) {
+    if (style.lineHeight.isSpecified) style.lineHeight.toDp() else style.fontSize.toDp() * 1.4f
+}
+
+/** One tile in a [MetricRow]. [accent] falls back to the theme primary when left null. */
+data class Metric(
+    val value: String,
+    val label: String,
+    val accent: Color? = null,
+    val icon: ImageVector? = null,
+)
+
+/**
+ * Lays [MetricTile]s out in lines of at most three, wrapping onto further lines as needed.
+ *
+ * Four tiles across a 360dp phone leave each one roughly 42dp of usable text width — narrower
+ * than the word "Syllabus". Each tile then shrinks its own text by a different amount and the row
+ * stops reading as one set of numbers. Wrapping four into 2x2 gives each tile about 128dp, which
+ * fits the real labels at their intended size, so nothing has to shrink at all.
+ */
+@Composable
+fun MetricRow(
+    metrics: List<Metric>,
+    modifier: Modifier = Modifier,
+) {
+    if (metrics.isEmpty()) return
+    val perLine = if (metrics.size == 4) 2 else minOf(metrics.size, 3)
+    val primary = MaterialTheme.colorScheme.primary
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        metrics.chunked(perLine).forEach { line ->
+            Row(
+                // Intrinsic min height plus fillMaxHeight makes every tile on a line as tall as
+                // the tallest, so one wrapped label never leaves its neighbours short.
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                line.forEach { metric ->
+                    MetricTile(
+                        value = metric.value,
+                        label = metric.label,
+                        icon = metric.icon,
+                        accent = metric.accent ?: primary,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
+                }
+                // A short final line keeps the column widths of the lines above it, rather than
+                // letting one leftover tile stretch across the whole card.
+                repeat(perLine - line.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
+}
+
+/**
+ * The one list-row style shared by every "person or group you can open" list — students,
+ * mentees, leads, faculty, batches.
+ *
+ * The status pill sits under the title rather than beside it. In the previous side-by-side
+ * layout the pill was measured first and the title column got whatever was left, so a wide pill
+ * ("68% compliance", "Moderate risk") squeezed the name into two broken lines on a 360dp phone.
+ * Here the title always gets the full row width, and the pill reads as what it is: a property of
+ * the row, not a competing column.
+ */
+@Composable
+fun EntityRow(
+    title: String,
+    subtitle: String,
+    pillText: String,
+    pillContainer: Color,
+    pillContent: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leading: (@Composable () -> Unit)? = null,
+    titleDotColor: Color? = null,
+    note: String? = null,
+    noteColor: Color = Color.Unspecified,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (leading != null) {
+            leading()
+            HSpace(14)
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (titleDotColor != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(titleDotColor),
+                    )
+                    HSpace(6)
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StatusPill(text = pillText, container = pillContainer, content = pillContent)
+                if (note != null) {
+                    HSpace(8)
+                    Text(
+                        text = note,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (noteColor == Color.Unspecified) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            noteColor
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+        HSpace(8)
+        Icon(
+            Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * Single-line text that steps its own font size down until it fits the width it is given.
+ *
+ * Compose wraps by character once a container is narrower than a single word, which turns a
+ * metric like "81%" into two stacked lines. Forcing one line with [softWrap] = false alone would
+ * clip instead. Measuring, shrinking and re-measuring keeps the value whole and legible at any
+ * screen width or user font scale, down to [minScale] of the original size.
+ *
+ * Drawing is held back until a size that fits is found, so the shrink steps are never visible.
+ */
+@Composable
+fun AutoShrinkText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    minScale: Float = 0.6f,
+) {
+    var resolved by remember(text, style) { mutableStateOf(style) }
+    var measured by remember(text, style) { mutableStateOf(false) }
+    Text(
+        text = text,
+        style = resolved,
+        color = color,
+        maxLines = 1,
+        softWrap = false,
+        modifier = modifier.drawWithContent { if (measured) drawContent() },
+        onTextLayout = { result ->
+            if (result.didOverflowWidth && resolved.fontSize > style.fontSize * minScale) {
+                resolved = resolved.copy(fontSize = resolved.fontSize * 0.92f)
+            } else {
+                measured = true
+            }
+        },
+    )
 }
 
 /** Subject name + horizontal progress bar + percentage, used for syllabus/attendance splits. */

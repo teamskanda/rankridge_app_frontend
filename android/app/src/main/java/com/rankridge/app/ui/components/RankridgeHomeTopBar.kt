@@ -94,7 +94,11 @@ fun RankridgeHomeTopBar(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = contentColor.copy(alpha = 0.78f),
-                    maxLines = 1,
+                    // Two lines, not one: a student's line is course, batch and goal
+                    // ("Class XI · Nucleus XI-A · JEE Main + Advanced") and on a 360dp
+                    // phone one line cut the goal off, which is the part that identifies which
+                    // programme they are actually on.
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }

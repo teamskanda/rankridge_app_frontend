@@ -21,11 +21,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.rankridge.app.ui.common.EntityRow
 import com.rankridge.app.ui.common.HSpace
+import com.rankridge.app.ui.common.InitialsAvatar
 import com.rankridge.app.ui.common.StatusPill
 
 /** Colour + label mapping for [RiskLevel], shared by the Home, Students and detail screens. */
@@ -66,46 +69,15 @@ fun MenteeRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = riskColors(student.riskLevel)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(colors.container),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(student.initials, style = MaterialTheme.typography.titleSmall, color = colors.content)
-        }
-        HSpace(14)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(student.name, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = "${student.classYear} · ${student.batch}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            StatusPill(text = student.riskLevel.label(), container = colors.container, content = colors.content)
-            Spacer(Modifier.size(4.dp))
-            Text(
-                text = "${student.attendancePercent}% att.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        HSpace(4)
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    EntityRow(
+        title = student.name,
+        subtitle = "${student.classYear} · ${student.batch}",
+        pillText = student.riskLevel.label(),
+        pillContainer = colors.container,
+        pillContent = colors.content,
+        note = "${student.attendancePercent}% attendance",
+        onClick = onClick,
+        modifier = modifier,
+        leading = { InitialsAvatar(student.initials, colors.container, colors.content) },
+    )
 }

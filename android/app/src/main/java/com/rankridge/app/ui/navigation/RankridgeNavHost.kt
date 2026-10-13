@@ -11,6 +11,7 @@ import com.rankridge.app.ui.auth.UserRole
 import com.rankridge.app.ui.auth.login.LoginScreen
 import com.rankridge.app.ui.auth.otp.OtpScreen
 import com.rankridge.app.ui.academichead.AcademicHeadDashboardScreen
+import com.rankridge.app.ui.admin.AdminConsoleScreen
 import com.rankridge.app.ui.auth.register.CreateAccountScreen
 import com.rankridge.app.ui.common.rankridgeEnterTransition
 import com.rankridge.app.ui.common.rankridgeExitTransition
@@ -32,21 +33,26 @@ object Routes {
     const val TEACHER_HOME = "teacher_home"
     const val COUNSELLOR_HOME = "counsellor_home"
     const val ACADEMIC_HEAD_HOME = "academic_head_home"
+    const val ADMIN_HOME = "admin_home"
 
     const val ARG_PHONE = "phone"
     const val ARG_ROLE = "role"
     const val OTP_WITH_ARGS = "$OTP/{$ARG_PHONE}/{$ARG_ROLE}"
     fun otp(phone: String, role: UserRole) = "$OTP/$phone/${role.name}"
 
-    /** Student, Parent, Mentor, Teacher, Counsellor and Academic Head dashboards exist today;
-     * every other role lands on Student's. */
+    /**
+     * Every role has its own destination. Exhaustive on purpose: the previous `else ->
+     * STUDENT_HOME` fallback meant an Admin sign-in silently opened the Student dashboard, and
+     * any role added later would have inherited the same bug instead of failing to compile.
+     */
     fun homeFor(role: UserRole) = when (role) {
+        UserRole.STUDENT -> STUDENT_HOME
         UserRole.PARENT -> PARENT_HOME
         UserRole.MENTOR -> MENTOR_HOME
         UserRole.TEACHER -> TEACHER_HOME
         UserRole.COUNSELLOR -> COUNSELLOR_HOME
         UserRole.ACADEMIC_HEAD -> ACADEMIC_HEAD_HOME
-        else -> STUDENT_HOME
+        UserRole.ADMIN -> ADMIN_HOME
     }
 }
 
@@ -166,6 +172,17 @@ fun RankridgeNavHost(
                 onSignOut = {
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.ACADEMIC_HEAD_HOME) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable(Routes.ADMIN_HOME) {
+            AdminConsoleScreen(
+                onSignOut = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.ADMIN_HOME) { inclusive = true }
                         launchSingleTop = true
                     }
                 },

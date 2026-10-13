@@ -5,4 +5,9 @@
          scheme; these XML colors only back the pre-Compose window background and launcher icon. -->
     <color name="ic_launcher_background">#011832</color>
     <color name="brand_surface">#F5FBFC</color>
+    <!-- Base-value fallback for the values-night override below. values-night/themes.xml
+         references this color, and a resource that only exists behind a -night qualifier
+         trips lint's MissingDefaultResource check (lintVitalRelease treats it as fatal) —
+         there has to be a value available when the qualifier doesn't apply. -->
+    <color name="brand_surface_dark">#071826</color>
 </resources>

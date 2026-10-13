@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,17 +25,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.rankridge.app.ui.common.DashboardCard
 import com.rankridge.app.ui.common.HSpace
-import com.rankridge.app.ui.common.MetricTile
+import com.rankridge.app.ui.common.Metric
+import com.rankridge.app.ui.common.MetricRow
 import com.rankridge.app.ui.common.SectionHeader
 import com.rankridge.app.ui.common.StatusPill
 import com.rankridge.app.ui.common.VSpace
 import com.rankridge.app.ui.teacher.DoubtStatus
 import com.rankridge.app.ui.teacher.RiskLevel
-import com.rankridge.app.ui.teacher.ScheduleEvent
+import com.rankridge.app.ui.teacher.ScheduleEventRow
 import com.rankridge.app.ui.teacher.TeacherDashboard
 import com.rankridge.app.ui.teacher.TeacherMockData
 import com.rankridge.app.ui.teacher.TeacherStudentRow
@@ -74,27 +77,29 @@ fun TeacherHomeScreen(
         VSpace(16)
 
         DashboardCard {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MetricTile(value = "${today.size}", label = "Today", modifier = Modifier.weight(1f))
-                MetricTile(
-                    value = "$avgSyllabus%",
-                    label = "Syllabus",
-                    modifier = Modifier.weight(1f),
-                    accent = MaterialTheme.colorScheme.secondary,
-                )
-                MetricTile(
-                    value = "$pendingAttendance",
-                    label = "Pending att.",
-                    modifier = Modifier.weight(1f),
-                    accent = MaterialTheme.colorScheme.error,
-                )
-                MetricTile(
-                    value = "$ptmsToday",
-                    label = "PTMs today",
-                    modifier = Modifier.weight(1f),
-                    accent = MaterialTheme.colorScheme.tertiary,
-                )
-            }
+            // Four metrics, so MetricRow lays them out 2x2. Across one line on a 360dp phone each
+            // tile would be about 42dp wide and every label would have to shrink to a different
+            // size to fit; at half the card they all render at their intended size.
+            MetricRow(
+                listOf(
+                    Metric("${today.size}", "Classes today"),
+                    Metric(
+                        value = "$avgSyllabus%",
+                        label = "Syllabus done",
+                        accent = MaterialTheme.colorScheme.secondary,
+                    ),
+                    Metric(
+                        value = "$pendingAttendance",
+                        label = "Attendance due",
+                        accent = MaterialTheme.colorScheme.error,
+                    ),
+                    Metric(
+                        value = "$ptmsToday",
+                        label = "PTMs today",
+                        accent = MaterialTheme.colorScheme.tertiary,
+                    ),
+                ),
+            )
         }
 
         SectionHeader("Today's schedule", actionText = "Full schedule", onActionClick = onOpenSchedule)
@@ -105,7 +110,7 @@ fun TeacherHomeScreen(
         } else {
             DashboardCard {
                 today.forEachIndexed { index, event ->
-                    ScheduleRow(event, onMarkAttendance)
+                    ScheduleEventRow(event, onMarkAttendance)
                     if (index != today.lastIndex) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     }
@@ -130,72 +135,35 @@ fun TeacherHomeScreen(
             DashboardCard {
                 openDoubts.forEachIndexed { index, doubt ->
                     val colors = doubtColors(doubt.status)
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("${doubt.studentName} · ${doubt.batchName}", style = MaterialTheme.typography.titleSmall)
-                                HSpace(8)
-                                StatusPill(text = doubt.status.label(), container = colors.container, content = colors.content)
+                    // Name, question, then status and action on their own line. Side by side, the
+                    // "Resolve" button and the status pill between them left the student name
+                    // about a third of the row and broke it mid-word on a 360dp phone.
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+                        Text(
+                            text = "${doubt.studentName} · ${doubt.batchName}",
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            text = doubt.question,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            StatusPill(text = doubt.status.label(), container = colors.container, content = colors.content)
+                            Spacer(Modifier.weight(1f))
+                            TextButton(onClick = { onResolveDoubt(doubt.id) }) {
+                                Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
+                                Text("Resolve")
                             }
-                            Text(
-                                text = doubt.question,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 2.dp),
-                            )
-                        }
-                        TextButton(onClick = { onResolveDoubt(doubt.id) }) {
-                            Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
-                            Text("Resolve")
                         }
                     }
                     if (index != openDoubts.lastIndex) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ScheduleRow(event: ScheduleEvent, onMarkAttendance: (String) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(event.type.icon(), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(20.dp))
-        }
-        HSpace(12)
-        Column(modifier = Modifier.weight(1f)) {
-            Text("${event.timeLabel} · ${event.type.label()}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(event.subjectOrTopic, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = "${event.batchName} · ${event.location}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (event.requiresAttendance) {
-            if (event.attendanceMarked) {
-                StatusPill(
-                    text = "Marked",
-                    container = MaterialTheme.colorScheme.tertiaryContainer,
-                    content = MaterialTheme.colorScheme.onTertiaryContainer,
-                )
-            } else {
-                Button(onClick = { onMarkAttendance(event.id) }) {
-                    Text("Mark")
                 }
             }
         }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -23,10 +24,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.rankridge.app.ui.common.EntityRow
 import com.rankridge.app.ui.common.HSpace
+import com.rankridge.app.ui.common.InitialsAvatar
 import com.rankridge.app.ui.common.StatusPill
 import com.rankridge.app.ui.common.bandColors
 import com.rankridge.app.ui.common.label
@@ -63,50 +67,18 @@ fun FacultyRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = bandColors(faculty.band)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(colors.container),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(faculty.initials, style = MaterialTheme.typography.titleSmall, color = colors.content)
-        }
-        HSpace(14)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(faculty.name, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = "${faculty.subject} · ${faculty.batchesTaught.joinToString(", ")}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            StatusPill(text = "${faculty.compliancePercent}% compliance", container = colors.container, content = colors.content)
-            if (faculty.unmarkedLectures > 0) {
-                Spacer(Modifier.size(4.dp))
-                Text(
-                    text = "${faculty.unmarkedLectures} unmarked",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-        HSpace(4)
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    EntityRow(
+        title = faculty.name,
+        subtitle = "${faculty.subject} · ${faculty.batchesTaught.joinToString(", ")}",
+        pillText = "${faculty.compliancePercent}% compliance",
+        pillContainer = colors.container,
+        pillContent = colors.content,
+        note = if (faculty.unmarkedLectures > 0) "${faculty.unmarkedLectures} unmarked" else null,
+        noteColor = MaterialTheme.colorScheme.error,
+        onClick = onClick,
+        modifier = modifier,
+        leading = { InitialsAvatar(faculty.initials, colors.container, colors.content) },
+    )
 }
 
 /** One batch row: name/course, at-risk badge, band pill, tap to open the batch detail screen. */
@@ -117,40 +89,17 @@ fun BatchRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = bandColors(batch.band)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(batch.name, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = "${batch.course} · ${batch.studentCount} students",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            StatusPill(text = batch.band.label(), container = colors.container, content = colors.content)
-            if (batch.atRiskCount > 0) {
-                Spacer(Modifier.size(4.dp))
-                Text(
-                    text = "${batch.atRiskCount} at risk",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-        HSpace(4)
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    EntityRow(
+        title = batch.name,
+        subtitle = "${batch.course} · ${batch.studentCount} students",
+        pillText = batch.band.label(),
+        pillContainer = colors.container,
+        pillContent = colors.content,
+        note = if (batch.atRiskCount > 0) "${batch.atRiskCount} at risk" else null,
+        noteColor = MaterialTheme.colorScheme.error,
+        onClick = onClick,
+        modifier = modifier,
+    )
 }
 
 /** One compliance alert row with severity pill and an optional Resolve action. */
@@ -161,6 +110,9 @@ fun ComplianceAlertRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = severityColors(alert.severity)
+    // Severity, title and detail run the full width; the resolve action sits on its own line
+    // underneath. As a trailing button it took about a third of the row, so an alert title
+    // ("3 unmarked lectures") wrapped and its detail sentence was cut off mid-word.
     Row(
         modifier = modifier.fillMaxWidth().padding(vertical = 10.dp),
         verticalAlignment = Alignment.Top,
@@ -173,11 +125,9 @@ fun ComplianceAlertRow(
         )
         HSpace(10)
         Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                StatusPill(text = alert.severity.label(), container = colors.container, content = colors.content)
-                HSpace(8)
-                Text(alert.title, style = MaterialTheme.typography.titleSmall)
-            }
+            StatusPill(text = alert.severity.label(), container = colors.container, content = colors.content)
+            Spacer(Modifier.size(6.dp))
+            Text(alert.title, style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.size(4.dp))
             Text(
                 text = alert.detail,
@@ -189,15 +139,21 @@ fun ComplianceAlertRow(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        }
-        if (onResolve != null && !alert.resolved) {
-            HSpace(8)
-            androidx.compose.material3.TextButton(onClick = { onResolve(alert.id) }) {
-                Text("Resolve")
+            if (onResolve != null && !alert.resolved) {
+                androidx.compose.material3.TextButton(
+                    onClick = { onResolve(alert.id) },
+                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp),
+                ) {
+                    Text("Resolve")
+                }
+            } else if (alert.resolved) {
+                Spacer(Modifier.size(6.dp))
+                Text(
+                    text = "Resolved",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
             }
-        } else if (alert.resolved) {
-            HSpace(8)
-            Text("Resolved", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.tertiary)
         }
     }
 }

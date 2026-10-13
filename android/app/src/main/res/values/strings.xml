@@ -31,6 +31,12 @@
     <!-- Home / dashboard -->
     <string name="action_sign_out">Sign out</string>
 
+    <!-- Admin (the admin console is a web dashboard, not a mobile one) -->
+    <string name="admin_console_title">The admin console is on web</string>
+    <string name="admin_console_body">Running the institute needs tables, filters, bulk actions and exports — work a desktop screen does properly and a phone does not. Sign in there with this same account.</string>
+    <string name="admin_console_url">admin.rankridge.com</string>
+    <string name="admin_console_waiting">What is waiting for you there</string>
+
     <!-- Student dashboard navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_learn">Learn</string>

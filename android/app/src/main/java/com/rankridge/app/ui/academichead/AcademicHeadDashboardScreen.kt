@@ -53,6 +53,7 @@ import com.rankridge.app.ui.academichead.faculty.AcademicHeadFacultyScreen
 import com.rankridge.app.ui.academichead.faculty.FacultyDetailScreen
 import com.rankridge.app.ui.academichead.home.AcademicHeadHomeScreen
 import com.rankridge.app.ui.academichead.profile.AcademicHeadProfileScreen
+import com.rankridge.app.ui.common.AutoShrinkText
 import com.rankridge.app.ui.common.rankridgeEnterTransition
 import com.rankridge.app.ui.common.rankridgeExitTransition
 import com.rankridge.app.ui.common.rankridgePopEnterTransition
@@ -199,7 +200,16 @@ fun AcademicHeadDashboardScreen(
                                     contentDescription = null,
                                 )
                             },
-                            label = { Text(stringResource(tab.labelRes)) },
+                            label = {
+                                // A five-tab bar on a 360dp phone gives each label ~72dp, which
+                                // is narrower than "Attendance" or "Schedule". Shrinking keeps
+                                // the whole word readable where ellipsising would cut it off.
+                                AutoShrinkText(
+                                    text = stringResource(tab.labelRes),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    minScale = 0.75f,
+                                )
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = onPrimary,
                                 selectedTextColor = onPrimary,

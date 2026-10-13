@@ -60,7 +60,10 @@ fun ParentUpdatesScreen(
         if (ptm != null) {
             SectionHeader("Upcoming PTM")
             DashboardCard {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // Status under the agenda, not beside it. As a trailing pill it took a third of
+                // the row, and the agenda ("Online · Discuss Mathematics performance and
+                // revision plan") was the part that got cut.
+                Row(verticalAlignment = Alignment.Top) {
                     Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
                     HSpace(10)
                     Column(modifier = Modifier.weight(1f)) {
@@ -70,12 +73,13 @@ fun ParentUpdatesScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        VSpace(8)
+                        StatusPill(
+                            text = if (ptm.status == PtmStatus.SCHEDULED) "Scheduled" else "Completed",
+                            container = MaterialTheme.colorScheme.secondaryContainer,
+                            content = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
                     }
-                    StatusPill(
-                        text = if (ptm.status == PtmStatus.SCHEDULED) "Scheduled" else "Completed",
-                        container = MaterialTheme.colorScheme.secondaryContainer,
-                        content = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
                 }
                 VSpace(12)
                 OutlinedButton(onClick = { onAction("Reschedule request sent") }, modifier = Modifier.fillMaxWidth()) {
