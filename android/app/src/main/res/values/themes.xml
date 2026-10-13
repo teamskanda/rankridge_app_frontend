@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base window theme. Compose drives the real colors; this governs the initial window
+         background and system bar handling before Compose draws. -->
+    <style name="Theme.Rankridge" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/brand_surface</item>
+    </style>
+</resources>

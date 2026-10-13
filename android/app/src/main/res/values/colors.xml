@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Aqua Peacock brand — deep peacock teal/aqua + gold + emerald, anchored by the navy
+         pulled from the RankRidge emblem. Compose (ui/theme/Color.kt) owns the full Material 3
+         scheme; these XML colors only back the pre-Compose window background and launcher icon. -->
+    <color name="ic_launcher_background">#011832</color>
+    <color name="brand_surface">#F5FBFC</color>
+</resources>

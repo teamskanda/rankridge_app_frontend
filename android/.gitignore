@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# Android module ignore rules.
+#
+# Most patterns are already covered by the project-root .gitignore; these are
+# repeated here so the android/ folder stays safe if it is ever extracted into
+# a repository of its own.
+# ---------------------------------------------------------------------------
+
+# Signing credentials — see Step 2 of the release-APK setup. Referenced by
+# app/build.gradle.kts via rootProject.file("keystore.properties"), which
+# resolves to this directory.
+keystore.properties
+*.jks
+*.keystore
+
+# Machine-specific SDK path, written by Android Studio.
+local.properties
+
+# Gradle / build output. Redirected to C:\AndroidBuilds\rankridge_app by
+# build.gradle.kts, so these normally stay empty.
+.gradle/
+build/
+captures/
+.cxx/
+*.apk
+*.aab
+
+# IDE
+.idea/
+*.iml

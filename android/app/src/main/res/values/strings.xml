@@ -1,0 +1,66 @@
+<resources>
+    <string name="app_name">Rankridge</string>
+
+    <!-- Login -->
+    <string name="login_title">Welcome back</string>
+    <string name="login_subtitle">Sign in with your phone number</string>
+    <string name="action_continue">Continue</string>
+    <string name="prompt_no_account">Don\'t have an account?</string>
+    <string name="action_create_account">Create account</string>
+    <string name="login_footer">For students, teachers, parents &amp; institutes</string>
+
+    <!-- Create account -->
+    <string name="create_title">Create your account</string>
+    <string name="create_subtitle">Join Rankridge to get started</string>
+    <string name="label_full_name">Full name</string>
+    <string name="label_role">I am a</string>
+    <string name="action_send_otp">Send OTP</string>
+    <string name="prompt_have_account">Already have an account?</string>
+    <string name="action_sign_in_link">Sign in</string>
+
+    <!-- Phone / OTP -->
+    <string name="label_phone">Phone number</string>
+    <string name="phone_prefix">+91 </string>
+    <string name="otp_title">Verify your number</string>
+    <string name="otp_subtitle">Enter the 6-digit code sent to %1$s</string>
+    <string name="action_verify">Verify</string>
+    <string name="action_resend_otp">Resend OTP</string>
+    <string name="resend_in">Resend code in %1$ds</string>
+    <string name="otp_demo_hint">Demo: enter any 6 digits to continue.</string>
+
+    <!-- Home / dashboard -->
+    <string name="action_sign_out">Sign out</string>
+
+    <!-- Student dashboard navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_learn">Learn</string>
+    <string name="nav_tests">Tests</string>
+    <string name="nav_performance">Progress</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Parent dashboard navigation -->
+    <string name="nav_parent_progress">Progress</string>
+    <string name="nav_parent_attendance">Attendance</string>
+    <string name="nav_parent_updates">Updates</string>
+
+    <!-- Mentor dashboard navigation -->
+    <string name="nav_mentor_students">Students</string>
+    <string name="nav_mentor_followups">Follow-ups</string>
+
+    <!-- Teacher dashboard navigation -->
+    <string name="nav_teacher_batches">Batches</string>
+    <string name="nav_teacher_schedule">Schedule</string>
+    <string name="nav_teacher_students">Students</string>
+
+    <!-- Counsellor dashboard navigation -->
+    <string name="nav_counsellor_leads">Leads</string>
+    <string name="nav_counsellor_admissions">Admissions</string>
+
+    <!-- Academic Head dashboard navigation -->
+    <string name="nav_academichead_faculty">Faculty</string>
+    <string name="nav_academichead_batches">Batches</string>
+
+    <!-- Accessibility -->
+    <string name="cd_back">Back</string>
+    <string name="cd_brand_logo">RankRidge logo</string>
+</resources>
