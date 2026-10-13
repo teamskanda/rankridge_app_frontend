@@ -12,6 +12,7 @@ import com.rankridge.app.ui.auth.login.LoginScreen
 import com.rankridge.app.ui.auth.otp.OtpScreen
 import com.rankridge.app.ui.academichead.AcademicHeadDashboardScreen
 import com.rankridge.app.ui.admin.AdminConsoleScreen
+import com.rankridge.app.ui.assistant.AssistantScaffold
 import com.rankridge.app.ui.auth.register.CreateAccountScreen
 import com.rankridge.app.ui.common.rankridgeEnterTransition
 import com.rankridge.app.ui.common.rankridgeExitTransition
@@ -113,69 +114,81 @@ fun RankridgeNavHost(
         }
 
         composable(Routes.STUDENT_HOME) {
-            StudentDashboardScreen(
-                onSignOut = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.STUDENT_HOME) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-            )
+            AssistantScaffold(role = UserRole.STUDENT) {
+                StudentDashboardScreen(
+                    onSignOut = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.STUDENT_HOME) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
 
         composable(Routes.PARENT_HOME) {
-            ParentDashboardScreen(
-                onSignOut = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.PARENT_HOME) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-            )
+            AssistantScaffold(role = UserRole.PARENT) {
+                ParentDashboardScreen(
+                    onSignOut = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.PARENT_HOME) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
 
         composable(Routes.MENTOR_HOME) {
-            MentorDashboardScreen(
-                onSignOut = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.MENTOR_HOME) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-            )
+            AssistantScaffold(role = UserRole.MENTOR) {
+                MentorDashboardScreen(
+                    onSignOut = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.MENTOR_HOME) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
 
         composable(Routes.TEACHER_HOME) {
-            TeacherDashboardScreen(
-                onSignOut = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.TEACHER_HOME) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-            )
+            AssistantScaffold(role = UserRole.TEACHER) {
+                TeacherDashboardScreen(
+                    onSignOut = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.TEACHER_HOME) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
 
         composable(Routes.COUNSELLOR_HOME) {
-            CounsellorDashboardScreen(
-                onSignOut = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.COUNSELLOR_HOME) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-            )
+            AssistantScaffold(role = UserRole.COUNSELLOR) {
+                CounsellorDashboardScreen(
+                    onSignOut = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.COUNSELLOR_HOME) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
 
         composable(Routes.ACADEMIC_HEAD_HOME) {
-            AcademicHeadDashboardScreen(
-                onSignOut = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.ACADEMIC_HEAD_HOME) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-            )
+            AssistantScaffold(role = UserRole.ACADEMIC_HEAD) {
+                AcademicHeadDashboardScreen(
+                    onSignOut = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.ACADEMIC_HEAD_HOME) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
 
         composable(Routes.ADMIN_HOME) {

@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.rankridge.app.ui.navigation.RankridgeNavHost
 import com.rankridge.app.ui.theme.RankridgeTheme
+import com.rankridge.app.ui.update.UpdateGate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +23,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             RankridgeTheme {
                 RankridgeNavHost()
+                // App-level in-app updater: checks a public manifest on launch and prompts over
+                // whatever screen is showing, so every role sees it. Silent when up to date.
+                UpdateGate()
             }
         }
     }
