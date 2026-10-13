@@ -20,7 +20,7 @@ import java.net.URL
  */
 object UpdateConfig {
     const val MANIFEST_URL =
-        "https://raw.githubusercontent.com/teamskanda/rankridge-updates/main/version.json"
+        "https://raw.githubusercontent.com/teamskanda/rankridge_app_frontend/main/version.json"
 }
 
 /**

@@ -1,0 +1,11 @@
+{
+  "versionCode": 2,
+  "versionName": "1.1.0",
+  "apkUrl": "https://github.com/teamskanda/rankridge_app_frontend/releases/download/v1.1.0/Rankridge-1.1.0.apk",
+  "mandatory": false,
+  "notes": [
+    "New: Ridge AI assistant on every dashboard",
+    "New: automatic in-app updates",
+    "Narrow-screen alignment fixes"
+  ]
+}
